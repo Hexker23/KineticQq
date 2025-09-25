@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KinetiQ - Mudra Identifier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<style>
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-block;
+}
+</style>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#8B4513",
+        "background-light": "#F5F5F5",
+        "background-dark": "#1A1A1A",
+        "surface-light": "#FFFFFF",
+        "surface-dark": "#2C2C2C",
+        "text-light": "#1A1A1A",
+        "text-dark": "#F5F5F5",
+        "text-secondary-light": "#6B7280",
+        "text-secondary-dark": "#9CA3AF"
+      },
+      fontFamily: {
+        display: ["Tinos", "serif"],
+        body: ["Noto Sans", "sans-serif"],
+      },
+      borderRadius: {
+        DEFAULT: "0.5rem",
+      },
+    },
+  },
+};
+</script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark transition-colors duration-300">
+<div class="min-h-screen flex flex-col">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md shadow-md">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      <div class="flex items-center space-x-4">
+        <span class="material-icons text-primary text-4xl">temple_hindu</span>
+        <a class="text-3xl font-display font-bold text-primary" href="#">KinetiQ</a>
+      </div>
+      <nav class="hidden md:flex items-center space-x-8">
+        <a class="hover:text-primary transition-colors" href="#home">Home</a>
+        <a class="hover:text-primary transition-colors" href="#search">Search</a>
+        <a class="hover:text-primary transition-colors" href="#about">About</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="flex-grow">
+
+<!-- Hero -->
+<section class="relative h-screen w-full" id="home">
+  <img src="IMG1.jpg" class="w-full h-full object-cover"/>
+  <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+    <div class="flex flex-col items-center justify-center min-h-screen text-center">
+      <h1 class="text-5xl md:text-7xl text-white font-display font-bold drop-shadow-lg">
+        Discover the Language of Dance
+      </h1>
+      <p class="mt-4 text-lg md:text-xl text-white font-body max-w-2xl drop-shadow-md">
+        Unveil the stories told by ancient hand gestures. KinetiQ helps you identify and understand the rich vocabulary of Mudras.
+      </p>
+      <a href="#search" class="mt-8 inline-block bg-primary text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105">
+        Start Exploring
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Search Section -->
+<section id="search" class="min-h-screen bg-background-light dark:bg-background-dark py-20 px-4 sm:px-6 lg:px-8">
+<div class="container mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+  <!-- Identify a Mudra Box -->
+  <div class="flex flex-col items-center justify-center h-full p-8 bg-surface-light dark:bg-surface-dark rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+    <h2 class="text-3xl font-display font-bold text-primary mb-2">Identify a Mudra</h2>
+    <p class="text-text-secondary-light dark:text-text-secondary-dark mb-8 text-center">
+      Upload an image, use your camera, or paste an image URL
+    </p>
+    <div class="w-full max-w-md">
+      <div class="flex items-center space-x-4 mb-4">
+        <!-- Upload Button -->
+        <button id="upload-btn" class="flex-1 flex items-center justify-center gap-2 bg-primary text-white h-14 rounded-full text-sm font-semibold hover:bg-opacity-90">
+          <span class="material-icons">upload_file</span> Upload Image
+        </button>
+        <input type="file" id="file-input" accept="image/*" class="hidden" />
+
+        <!-- Camera Button -->
+        <button id="open-camera-btn" class="flex-1 flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 h-14 rounded-full text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">
+          <span class="material-icons">photo_camera</span> Open Camera
+        </button>
+      </div>
+
+      <!-- Live Camera -->
+      <video id="camera-stream" autoplay playsinline class="hidden w-full h-64 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></video>
+
+      <!-- Captured/Uploaded Photo -->
+      <img id="captured-photo" class="hidden w-full h-64 rounded-lg border border-gray-300 dark:border-gray-600 mb-4 object-contain"/>
+
+      <!-- Action Buttons -->
+      <button id="capture-btn" class="hidden w-full py-2 bg-primary text-white rounded-lg mb-2">Capture</button>
+      <button id="retry-btn" class="hidden w-full py-2 bg-gray-500 text-white rounded-lg">Retake / Re-upload</button>
+    </div>
+  </div>
+
+  <!-- Output Box -->
+  <div class="flex flex-col items-center justify-start p-8 bg-surface-light dark:bg-surface-dark rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 min-h-[500px]">
+    <h2 class="text-3xl font-display font-bold text-primary mb-4">Output Mudras</h2>
+    <div id="output-box" class="w-full h-64 bg-background-light dark:bg-background-dark rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 overflow-hidden">
+      <p id="output-placeholder" class="text-text-secondary-light dark:text-text-secondary-dark">Your identified Mudra will appear here</p>
+    </div>
+    <div class="mt-6 w-full text-left">
+      <h3 class="text-2xl font-display font-bold">Mudra Name</h3>
+      <p class="text-lg text-primary font-semibold">e.g., Pataka</p>
+      <p class="mt-2 text-text-secondary-light dark:text-text-secondary-dark">
+        A detailed description of the identified Mudra will be displayed here after analysis.
+      </p>
+    </div>
+  </div>
+
+</div>
+</div>
+</section>
+</main>
+</div>
+
+<!-- Camera + Upload Logic -->
+<script>
+const openCameraBtn = document.querySelector("#open-camera-btn");
+const captureBtn = document.querySelector("#capture-btn");
+const retryBtn = document.querySelector("#retry-btn");
+const uploadBtn = document.querySelector("#upload-btn");
+const fileInput = document.querySelector("#file-input");
+const video = document.querySelector("#camera-stream");
+const capturedPhoto = document.querySelector("#captured-photo");
+
+let cameraStream;
+
+// 📁 Open File Explorer
+uploadBtn.addEventListener("click", () => fileInput.click());
+
+// 📂 Handle Uploaded Image
+fileInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      capturedPhoto.src = e.target.result;
+      capturedPhoto.classList.remove("hidden");
+      video.classList.add("hidden");
+      captureBtn.classList.add("hidden");
+      retryBtn.classList.remove("hidden");
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// 📸 Open Camera
+openCameraBtn.addEventListener("click", async () => {
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = cameraStream;
+    video.classList.remove("hidden");
+    capturedPhoto.classList.add("hidden");
+    captureBtn.classList.remove("hidden");
+    retryBtn.classList.add("hidden");
+  } catch (err) {
+    alert("Camera access denied or unavailable!");
+    console.error(err);
+  }
+});
+
+// 📷 Capture Snapshot
+captureBtn.addEventListener("click", () => {
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const imageData = canvas.toDataURL("image/png");
+
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+  }
+
+  capturedPhoto.src = imageData;
+  capturedPhoto.classList.remove("hidden");
+  video.classList.add("hidden");
+  captureBtn.classList.add("hidden");
+  retryBtn.classList.remove("hidden");
+
+  console.log("Captured Image Data:", imageData);
+});
+
+// 🔄 Retry / Re-upload
+retryBtn.addEventListener("click", () => {
+  capturedPhoto.classList.add("hidden");
+  retryBtn.classList.add("hidden");
+});
+</script>
+
+</body>
+</html>
