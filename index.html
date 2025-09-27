@@ -115,6 +115,12 @@ tailwind.config = {
 
       <!-- Capture Button -->
       <button id="capture-btn" class="hidden w-full py-2 bg-primary text-white rounded-lg">Capture</button>
+
+      <!-- Retake / Cancel Buttons -->
+      <div id="photo-actions" class="hidden flex gap-4 mt-2">
+        <button id="retake-btn" class="flex-1 bg-blue-400 hover:bg-primary text-white font-semibold py-2 rounded-lg">🔄 Retake</button>
+        <button id="cancel-btn" class="flex-1 bg-gray-500 hover:bg-primary text-white font-semibold py-2 rounded-lg">❌ Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -157,6 +163,9 @@ const video = document.querySelector("#camera-stream");
 const capturedPhoto = document.querySelector("#captured-photo");
 const uploadBtn = document.querySelector("#upload-btn");
 const fileInput = document.querySelector("#file-input");
+const photoActions = document.querySelector("#photo-actions");
+const retakeBtn = document.querySelector("#retake-btn");
+const cancelBtn = document.querySelector("#cancel-btn");
 
 let cameraStream;
 
@@ -168,11 +177,21 @@ openCameraBtn.addEventListener("click", async () => {
     video.classList.remove("hidden");
     capturedPhoto.classList.add("hidden");
     captureBtn.classList.remove("hidden");
+    photoActions.classList.add("hidden");
   } catch (err) {
     alert("Camera access denied or unavailable!");
     console.error(err);
   }
 });
+
+// Show photo helper
+function showPhoto(imageData) {
+  capturedPhoto.src = imageData;
+  capturedPhoto.classList.remove("hidden");
+  video.classList.add("hidden");
+  captureBtn.classList.add("hidden");
+  photoActions.classList.remove("hidden");
+}
 
 // Capture snapshot
 captureBtn.addEventListener("click", () => {
@@ -184,15 +203,10 @@ captureBtn.addEventListener("click", () => {
 
   // Stop camera after capture
   cameraStream.getTracks().forEach(track => track.stop());
-  video.classList.add("hidden");
-  captureBtn.classList.add("hidden");
 
-  // Show captured photo inside same box
+  // Show captured photo
   const imageData = canvas.toDataURL("image/png");
-  capturedPhoto.src = imageData;
-  capturedPhoto.classList.remove("hidden");
-
-  console.log("Captured Image Data:", imageData);
+  showPhoto(imageData);
 });
 
 // Upload image from file
@@ -203,13 +217,34 @@ fileInput.addEventListener("change", (event) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      capturedPhoto.src = e.target.result;
-      capturedPhoto.classList.remove("hidden");
-      video.classList.add("hidden");
-      captureBtn.classList.add("hidden");
+      showPhoto(e.target.result);
     };
     reader.readAsDataURL(file);
   }
+});
+
+// Retake Button → restart camera
+retakeBtn.addEventListener("click", async () => {
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = cameraStream;
+    video.classList.remove("hidden");
+    captureBtn.classList.remove("hidden");
+    capturedPhoto.classList.add("hidden");
+    photoActions.classList.add("hidden");
+  } catch (err) {
+    alert("Unable to access camera for retake!");
+    console.error(err);
+  }
+});
+
+// Cancel Button → clear everything
+cancelBtn.addEventListener("click", () => {
+  capturedPhoto.src = "";
+  capturedPhoto.classList.add("hidden");
+  photoActions.classList.add("hidden");
+  video.classList.add("hidden");
+  captureBtn.classList.add("hidden");
 });
 
 // Feedback Logic
