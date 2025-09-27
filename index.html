@@ -48,7 +48,6 @@ tailwind.config = {
 <body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark transition-colors duration-300">
 <div class="min-h-screen flex flex-col">
 
-<!-- Header -->
 <header class="sticky top-0 z-50 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md shadow-md">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-20">
@@ -66,7 +65,6 @@ tailwind.config = {
 </header>
 
 <main class="flex-grow">
-
 <!-- Hero -->
 <section class="relative h-screen w-full" id="home">
   <img src="IMG1.jpg" class="w-full h-full object-cover"/>
@@ -90,7 +88,7 @@ tailwind.config = {
 <div class="container mx-auto">
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-  <!-- Identify a Mudra Box -->
+  <!-- Camera & Upload -->
   <div class="flex flex-col items-center justify-center h-full p-8 bg-surface-light dark:bg-surface-dark rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
     <h2 class="text-3xl font-display font-bold text-primary mb-2">Identify a Mudra</h2>
     <p class="text-text-secondary-light dark:text-text-secondary-dark mb-8 text-center">
@@ -98,35 +96,25 @@ tailwind.config = {
     </p>
     <div class="w-full max-w-md">
       <div class="flex items-center space-x-4 mb-4">
-        <!-- Upload Button -->
-        <button id="upload-btn" class="flex-1 flex items-center justify-center gap-2 bg-primary text-white h-14 rounded-full text-sm font-semibold hover:bg-opacity-90">
+        <button class="flex-1 flex items-center justify-center gap-2 bg-primary text-white h-14 rounded-full text-sm font-semibold hover:bg-opacity-90">
           <span class="material-icons">upload_file</span> Upload Image
         </button>
-        <input type="file" id="file-input" accept="image/*" class="hidden" />
-
-        <!-- Camera Button -->
         <button id="open-camera-btn" class="flex-1 flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 h-14 rounded-full text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">
           <span class="material-icons">photo_camera</span> Open Camera
         </button>
       </div>
-
-      <!-- Live Camera -->
+      <!-- Camera video -->
       <video id="camera-stream" autoplay playsinline class="hidden w-full h-64 rounded-lg border border-gray-300 dark:border-gray-600 mb-4"></video>
-
-      <!-- Captured/Uploaded Photo -->
-      <img id="captured-photo" class="hidden w-full h-64 rounded-lg border border-gray-300 dark:border-gray-600 mb-4 object-contain"/>
-
-      <!-- Action Buttons -->
-      <button id="capture-btn" class="hidden w-full py-2 bg-primary text-white rounded-lg mb-2">Capture</button>
-      <button id="retry-btn" class="hidden w-full py-2 bg-gray-500 text-white rounded-lg">Retake / Re-upload</button>
+      <button id="capture-btn" class="hidden w-full py-2 bg-primary text-white rounded-lg">Capture</button>
     </div>
   </div>
 
-  <!-- Output Box -->
+  <!-- Output -->
   <div class="flex flex-col items-center justify-start p-8 bg-surface-light dark:bg-surface-dark rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 min-h-[500px]">
     <h2 class="text-3xl font-display font-bold text-primary mb-4">Output Mudras</h2>
     <div id="output-box" class="w-full h-64 bg-background-light dark:bg-background-dark rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 overflow-hidden">
       <p id="output-placeholder" class="text-text-secondary-light dark:text-text-secondary-dark">Your identified Mudra will appear here</p>
+      <img id="captured-image" class="hidden w-full h-full object-contain"/>
     </div>
     <div class="mt-6 w-full text-left">
       <h3 class="text-2xl font-display font-bold">Mudra Name</h3>
@@ -143,83 +131,29 @@ tailwind.config = {
 </main>
 </div>
 
-<!-- Camera + Upload Logic -->
 <script>
 const openCameraBtn = document.querySelector("#open-camera-btn");
 const captureBtn = document.querySelector("#capture-btn");
-const retryBtn = document.querySelector("#retry-btn");
-const uploadBtn = document.querySelector("#upload-btn");
-const fileInput = document.querySelector("#file-input");
 const video = document.querySelector("#camera-stream");
-const capturedPhoto = document.querySelector("#captured-photo");
+const capturedImage = document.querySelector("#captured-image");
+const outputPlaceholder = document.querySelector("#output-placeholder");
 
 let cameraStream;
 
-// 📁 Open File Explorer
-uploadBtn.addEventListener("click", () => fileInput.click());
-
-// 📂 Handle Uploaded Image
-fileInput.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      capturedPhoto.src = e.target.result;
-      capturedPhoto.classList.remove("hidden");
-      video.classList.add("hidden");
-      captureBtn.classList.add("hidden");
-      retryBtn.classList.remove("hidden");
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// 📸 Open Camera
+// Open camera
 openCameraBtn.addEventListener("click", async () => {
   try {
     cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = cameraStream;
     video.classList.remove("hidden");
-    capturedPhoto.classList.add("hidden");
     captureBtn.classList.remove("hidden");
-    retryBtn.classList.add("hidden");
   } catch (err) {
     alert("Camera access denied or unavailable!");
     console.error(err);
   }
 });
 
-// 📷 Capture Snapshot
-captureBtn.addEventListener("click", () => {
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  const imageData = canvas.toDataURL("image/png");
-
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
-  }
-
-  capturedPhoto.src = imageData;
-  capturedPhoto.classList.remove("hidden");
-  video.classList.add("hidden");
-  captureBtn.classList.add("hidden");
-  retryBtn.classList.remove("hidden");
-
-  console.log("Captured Image Data:", imageData);
-});
-
-// 🔄 Retry / Re-upload
-retryBtn.addEventListener("click", () => {
-  capturedPhoto.classList.add("hidden");
-  retryBtn.classList.add("hidden");
-});
 </script>
 
 </body>
